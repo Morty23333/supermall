@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: "GoodsListItem",
+  name: "goodsListItem",
 
   data() {
     return {};

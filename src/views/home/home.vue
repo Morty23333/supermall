@@ -1,16 +1,23 @@
 <template>
   <div id="home">
     <NavBar class="home-nav"><div slot="center">购物街</div></NavBar>
-    <HomeSwiper :banners="banners"></HomeSwiper>
-    <HomeRecommend :recommends="recommend"></HomeRecommend>
-    <FeatureViews></FeatureViews>
-    <tabControl
-      :titles="['流行', '新款', '精选']"
-      class="tab-control"
-      @tabClick="tabClick"
-    >
-    </tabControl>
-    <goodsList :goods="showGoods" />
+    <scroll class="content" ref="scroll" 
+    :probe-type="3"
+     @scroll="contentScroll" 
+     :pull-up-load="true"
+     @pullingUp="loadMore">
+      <HomeSwiper :banners="banners"></HomeSwiper>
+      <HomeRecommend :recommends="recommend"></HomeRecommend>
+      <FeatureViews></FeatureViews>
+      <tabControl
+        :titles="['流行', '新款', '精选']"
+        class="tab-control"
+        @tabClick="tabClick"
+      >
+      </tabControl>
+      <goodsList :goods="showGoods" />
+    </scroll>
+    <backTop @click.native="backClick" v-show="isShowBackTop"></backTop>
   </div>
 </template>
 
@@ -27,6 +34,10 @@ import { getHomeMultidata, getHomeGoods } from "../../network/home.js";
 import goodsListItem from "../../components/content/goods/goodsListItem.vue";
 import goodsList from "../../components/content/goods/goodsList.vue";
 
+import scroll from "../../components/common/scroll/Scroll.vue";
+
+import backTop from "../../components/content/backTop/backTop.vue"
+
 export default {
   name: "Home",
   components: {
@@ -37,6 +48,8 @@ export default {
     tabControl,
     goodsListItem,
     goodsList,
+    scroll,
+    backTop
   },
   data() {
     return {
@@ -47,20 +60,23 @@ export default {
         'new': { page: 0, list: [] },
         'sell': { page: 0, list: [] },
       },
-      currentType: 'pop',
+      currentType: "pop",
+      isShowBackTop: false
     };
   },
-  computed:{
-    showGoods(){
-        return this.goods[this.currentType].list
-    }
+  computed: {
+    showGoods() {
+      return this.goods[this.currentType].list;
+    },
+  },
+  mounted(){
+
   },
   created() {
     this.getHomeMultidata();
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
-    
   },
 
   methods: {
@@ -76,8 +92,12 @@ export default {
       getHomeGoods(type, page).then((res) => {
         console.log(res);
         // 接口错误
-        // this.goods[type].list.push(...res.data.list);
+        this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
+
+        this.$refs.scroll.finishPullUp()
+        // 刷新重新计算高度
+        this.$refs.scroll.scroll.refresh()
       });
     },
     // 事件监听
@@ -94,13 +114,28 @@ export default {
           break;
       }
     },
+    backClick(){
+        // 不报错不能动
+    //    this.$refs.scroll && this.$refs.scroll.scrollTo(0,0,4000)
+    this.$refs.scroll.scrollTo(0,0)
+    },
+    contentScroll(position){
+        // it works
+        // console.log(position);
+       this.isShowBackTop = -(position.y) > 1000
+    },
+    loadMore(){
+        // console.log('yes');
+        this.getHomeGoods(this.currentType)
+    }
   },
 };
 </script>
 
 <style scoped>
 #home {
-  padding-top: 44px;
+  /* padding-top: 44px; */
+  height: 100vh;
 }
 .home-nav {
   background-color: var(--color-tint);
@@ -111,5 +146,10 @@ export default {
   right: 0;
   top: 0;
   z-index: 9;
+}
+.content{
+    height: calc(100% - 93px);
+    overflow: hidden;
+    margin-top: 44px;
 }
 </style>

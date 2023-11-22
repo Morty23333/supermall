@@ -1,4 +1,4 @@
-import {request} from "../../../learnvuerouter/src/network/request.js"
+import {request} from "./request.js"
 
 export function getHomeMultidata(){
     return request({
