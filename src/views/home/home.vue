@@ -70,7 +70,10 @@ export default {
     },
   },
   mounted(){
-    this.debounce(this.$refs.scroll.refresh,500)
+    const refresh = this.debounce(this.$refs.scroll.refresh)
+        this.$bus.$on('itemImageLoad',()=>{
+            refresh()
+        })
   },
   created() {
     this.getHomeMultidata();
