@@ -70,13 +70,19 @@ export default {
     },
   },
   mounted(){
-
+    this.debounce(this.$refs.scroll.refresh,500)
   },
   created() {
     this.getHomeMultidata();
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
+
+    // 监听item中的图片加载完成
+    this.$bus.$on('itemImageLoad',()=>{
+        // console.log('you are right,but...');
+        this.$refs.scroll.refresh()
+    })
   },
 
   methods: {
@@ -127,6 +133,17 @@ export default {
     loadMore(){
         // console.log('yes');
         this.getHomeGoods(this.currentType)
+    },
+    debounce(func,delay){
+        let timer = null
+
+        return function(...args){
+            if(timer) clearTimeout(timer)
+            timer = setimeout(()=>{
+        func.apply(this,args)
+        },delay)
+        }
+
     }
   },
 };
