@@ -141,7 +141,7 @@ export default {
             if(timer) clearTimeout(timer)
             timer = setimeout(()=>{
         func.apply(this,args)
-        },delay)
+        },delay) 
         }
 
     }
