@@ -1,9 +1,16 @@
 <template>
   <div id="detail">
-    <DetailNavBar></DetailNavBar>
-    <DetailSwiper :top-images="topImages"></DetailSwiper>
-    <DetailBaseInfo :goods="goods"></DetailBaseInfo>
-    <DetailShopInfo :shop="shop"></DetailShopInfo>
+    <DetailNavBar class="detail-nav"></DetailNavBar>
+    <Scroll class="content">
+      <DetailSwiper :top-images="topImages"></DetailSwiper>
+      <DetailBaseInfo :goods="goods"></DetailBaseInfo>
+      <DetailShopInfo :shop="shop"></DetailShopInfo>
+      <DetailGoodsInfo
+        :detail-info="detailInfo"
+        @imageLoad="imageLoad"
+      ></DetailGoodsInfo>
+      <DetailParams :paramInfo="paramInfo"></DetailParams>
+    </Scroll>
   </div>
 </template>
 
@@ -13,8 +20,12 @@ import DetailSwiper from "./childComps/DetailSwiper.vue";
 
 import DetailShopInfo from "./childComps/DetailShopInfo.vue";
 import DetailBaseInfo from "./childComps/DetailBaseInfo.vue";
+import DetailGoodsInfo from "./childComps/DetailGoodsInfo.vue";
+import DetailParams from "./childComps/DetailParams.vue"
 
-import { getDetail, Goods, Shop } from "../../network/detail";
+import Scroll from "../../components/common/scroll/Scroll.vue";
+
+import { getDetail, Goods, Shop, GoodsParam } from "../../network/detail";
 
 export default {
   name: "Detail",
@@ -23,8 +34,10 @@ export default {
     return {
       iid: null,
       topImages: [],
-      //   shop:[],
-      //   goods:[]
+      goods: {},
+      shop: {},
+      detailInfo: {},
+      paramInfo: {},
     };
   },
   components: {
@@ -32,6 +45,9 @@ export default {
     DetailSwiper,
     DetailShopInfo,
     DetailBaseInfo,
+    DetailGoodsInfo,
+    DetailParams,
+    Scroll,
   },
   mounted() {},
   created() {
@@ -51,11 +67,38 @@ export default {
       );
       //   创建店铺信息对象
       this.shop = new Shop(data.shopInfo);
+
+      //   保存商品详情数据
+      this.detailInfo = data.detailInfo;
+
+      // 获取参数信息
+      this.paramInfo = new GoodsParam(
+        data.itemParams.info,
+        data.itemParams.rule
+      );
     });
   },
-  methods: {},
+  methods: {
+    imageLoad() {
+      this.$refs.scroll.refresh();
+    },
+  },
 };
 </script>
 
 <style scoped>
+#detail {
+  position: relative;
+  z-index: 9;
+  background-color: #fff;
+  height: 100vh;
+}
+.detail-nav {
+  position: relative;
+  z-index: 9;
+  background-color: #fff;
+}
+.content {
+  height: calc(100% - 44px);
+}
 </style>
