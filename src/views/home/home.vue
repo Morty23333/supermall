@@ -55,6 +55,7 @@ import scroll from "../../components/common/scroll/Scroll.vue";
 import backTop from "../../components/content/backTop/backTop.vue";
 
 import { debounce } from "../../common/utils.js";
+import { itemListenerMixin } from "../../common/mixin.js";
 
 export default {
   name: "Home",
@@ -69,6 +70,7 @@ export default {
     scroll,
     backTop,
   },
+  mixin: [itemListenerMixin],
   data() {
     return {
       banners: [],
@@ -97,13 +99,13 @@ export default {
   },
   deactivated() {
     // console.log("deactived");
+    // 1.保存Y值
     this.saveY = this.$refs.scroll.getScrollY();
+    // 2.取消全局事件的监听
+    this.$bus.$off('itemImgLoad',this.itemImageListener)
   },
   mounted() {
-    const refresh = debounce(this.$refs.scroll.refresh, 50);
-    this.$bus.$on("itemImageLoad", () => {
-      refresh();
-    });
+   
 
     this.tabOffsetTop = this.$refs.tabControl;
   },
@@ -154,7 +156,7 @@ export default {
           this.currentType = "sell";
           break;
       }
-      //   有问题
+      
       this.$refs.tabControl1.currentIndex = index;
       this.$refs.tabControl2.currentIndex = index;
     },
